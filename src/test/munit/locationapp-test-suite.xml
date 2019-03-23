@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:http="http://www.mulesoft.org/schema/mule/http"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:munit="http://www.mulesoft.org/schema/mule/munit"
+	xmlns:munit-tools="http://www.mulesoft.org/schema/mule/munit-tools" xmlns="http://www.mulesoft.org/schema/mule/core"
+	xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xsi:schemaLocation="
+		http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+		http://www.mulesoft.org/schema/mule/munit http://www.mulesoft.org/schema/mule/munit/current/mule-munit.xsd
+		http://www.mulesoft.org/schema/mule/munit-tools  http://www.mulesoft.org/schema/mule/munit-tools/current/mule-munit-tools.xsd
+http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd">
+	<munit:config name="locationapp-test-suite.xml" />
+	<http:request-config name="API_Config" doc:name="HTTP Request configuration" doc:id="2bc7a2d0-16ab-44a8-a4c3-5c283de42b04" basePath="/api" >
+		<http:request-connection host="locahost" port="8081" />
+	</http:request-config>
+	<munit:test name="locationapp-test-suite-locations-appFlowTest" description="Test" doc:id="1d23b303-02a8-4fa2-83fd-0758db44b4dd" >
+		<munit:behavior>
+			<http:request method="GET" doc:name="Request" doc:id="5c696270-9580-4803-a067-b65a5b361fd7" config-ref="API_Config" path="geocoding">
+				<http:query-params ><![CDATA[#[output application/java
+---
+{
+	"location" : "Fremont, CA"
+}]]]></http:query-params>
+			</http:request>
+		</munit:behavior>
+		<munit:execution >
+			<flow-ref doc:name="Flow-ref to locations-appFlow" doc:id="e43a3b1c-bb91-43cf-8839-799f86154c2a" name="locations-appFlow"/>
+		</munit:execution>
+		<munit:validation >
+			<munit-tools:assert-that doc:name="Assert Not null" doc:id="0d702047-7d4c-4eed-9710-238abdebd890" expression="#[payload]" is="#[MunitTools::notNullValue()]" message="Successfully received response"/>
+			<munit-tools:assert-that doc:name="Assert location" doc:id="68d9a413-0edf-4510-abba-220ff5a1e999" expression="#[payload.location]" is="Fremont, CA" message="Received response for right input"/>
+		</munit:validation>
+	</munit:test>
+	<munit:test name="locationapp-test-suite-locations-getFlowTest" description="Test" doc:id="d912957d-b56d-4e29-bd09-53d1051634bc" ignore="true">
+		<munit:execution >
+			<flow-ref doc:name="Flow-ref to locations-getFlow" doc:id="3571d55d-c2c5-49d5-abcb-8b2b4ec4f6ae" name="locations-getFlow"/>
+		</munit:execution>
+	</munit:test>
+
+</mule>

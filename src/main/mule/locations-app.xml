@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" xmlns:http="http://www.mulesoft.org/schema/mule/http"
+	xmlns:apikit="http://www.mulesoft.org/schema/mule/mule-apikit"
+	xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/mule-apikit http://www.mulesoft.org/schema/mule/mule-apikit/current/mule-apikit.xsd
+http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd
+http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd">
+	<apikit:config outboundHeadersMapName="outboundHeadersMapName" httpStatusVarName="httpStatus" doc:name="Router" doc:id="16936599-f0e7-4262-9c90-9cc7044bd077" name="mainAPIRouter" raml="../api/locations-api.raml" >
+		<apikit:flow-mappings >
+			<apikit:flow-mapping resource="/geocoding" action="get" flow-ref="locations-getFlow" />
+		</apikit:flow-mappings>
+	</apikit:config>
+	<http:listener-config name="HTTP_Listener_config" doc:name="HTTP Listener config" doc:id="c4c57a33-d3aa-41eb-92cf-dbb0d2dd9b9d" >
+		<http:listener-connection host="0.0.0.0" port="8081" />
+	</http:listener-config>
+	<http:request-config name="MapQuestGetGeoCoding" doc:name="HTTP Request configuration" doc:id="7e7017e5-53a4-4287-aa28-ad4fe92a4737" basePath="http://www.mapquestapi.com/geocoding/v1/address" >
+		<http:request-connection protocol="HTTPS" host="www.mapquestapi.com" port="80" />
+	</http:request-config>
+	<global-property doc:name="Global Property" doc:id="d129e22d-9a73-4cb5-93d2-c8653da40740" name="MapQuestKey" value="nczsRR072qcrOQRAE3apGZFaYlcWE05V" />
+	<global-property doc:name="Global Property" doc:id="8ae1b6c6-fb46-4020-9c3e-b3e2aba8d675" name="MapQuestURL" value="http://www.mapquestapi.com/geocoding/v1/address" />
+	<flow name="locations-appFlow" doc:id="c9652f9e-ede5-42b3-917b-fffd0097a064" >
+		<http:listener doc:name="Listener" doc:id="eda37c89-ff73-49a4-a2c3-75e9e8d463e2" config-ref="HTTP_Listener_config" path="/api/*"/>
+		<apikit:router doc:name="APIkit Router" doc:id="2b508134-ea1c-4c87-9e56-2643bda7c3e2" config-ref="mainAPIRouter"/>
+	</flow>
+	<flow name="locations-getFlow" doc:id="e2e3734c-b0dd-4efe-be54-e9d7454a5192" >
+		<logger level="INFO" doc:name="Logger" doc:id="20f0c2ca-d2db-42e0-bd5c-b4f62102e8c0" message="#[message.attributes.queryParams.location]"/>
+		<set-variable value="#[message.attributes.queryParams.location]" doc:name="Set Location Param" doc:id="8b766a5a-e8f0-4780-9d76-1758cf326a6b" variableName="location"/>
+		<http:request method="GET" doc:name="GetMapQuestResults" doc:id="83fddc32-7764-465c-98ce-7e494bfdd6bc" config-ref="MapQuestGetGeoCoding" url="http://www.mapquestapi.com/geocoding/v1/address" sendCorrelationId="AUTO">
+			<http:query-params ><![CDATA[#[output application/java
+---
+{
+	"key" : "${MapQuestKey}",
+	"location" : vars.location
+}]]]></http:query-params>
+		</http:request>
+		<set-variable value="#[payload]" doc:name="origPayload" doc:id="f9026de0-0891-42a2-86c5-620bb2d6d88c" variableName="origPayload" mimeType="application/json"/>
+		<ee:transform doc:name="Transform Message" doc:id="84077ce3-bab6-4007-bbee-afe14e3adc9b" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+{
+	location: payload.results.providedLocation.location,
+	geocoding: {
+		lat: payload.results[0].locations[0].latLng.lat,
+		lng: payload.results[0].locations[0].latLng.lng
+	}
+}]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+	</flow>
+</mule>

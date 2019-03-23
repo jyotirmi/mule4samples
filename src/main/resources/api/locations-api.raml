@@ -1,0 +1,19 @@
+#%RAML 1.0
+title: Locations
+version: v1
+/geocoding:
+  get:
+    queryParameters:
+      location: string
+    responses:
+      200:
+        body:
+          application/json:
+            example: |
+              {
+                "location" : "Denver, CO",
+                "geocoding": {
+                    "lat": 38.892062,
+                    "lng": -77.019912
+                  }
+              }

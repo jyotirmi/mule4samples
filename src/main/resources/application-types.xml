@@ -1,0 +1,69 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<types:mule xmlns:types="http://www.mulesoft.org/schema/mule/types">
+  <types:catalog>
+    <types:type name="GeoCoding" format="json">
+      <types:shape format="weave" example="examples/GeoCodingSample-1.json"><![CDATA[%dw 2.0
+type GeoCoding = {|
+  info: {|
+    statuscode: Number {"typeId": "int"}, 
+    copyright: {|
+      text: String, 
+      imageUrl: String, 
+      imageAltText: String
+    |}, 
+    messages: Array<Any>
+  |}, 
+  options: {|
+    maxResults: Number {"typeId": "int"}, 
+    thumbMaps: Boolean, 
+    ignoreLatLngInput: Boolean
+  |}, 
+  results: Array<{|
+    providedLocation: {| location: String |}, 
+    locations: Array<{|
+      street: String, 
+      adminArea6: String, 
+      adminArea6Type: String, 
+      adminArea5: String, 
+      adminArea5Type: String, 
+      adminArea4: String, 
+      adminArea4Type: String, 
+      adminArea3: String, 
+      adminArea3Type: String, 
+      adminArea1: String, 
+      adminArea1Type: String, 
+      postalCode: String, 
+      geocodeQualityCode: String, 
+      geocodeQuality: String, 
+      dragPoint: Boolean, 
+      sideOfStreet: String, 
+      linkId: String, 
+      unknownInput: String, 
+      "type": String, 
+      latLng: {|
+        lat: Number {"typeId": "double"}, 
+        lng: Number {"typeId": "double"}
+      |}, 
+      displayLatLng: {|
+        lat: Number {"typeId": "double"}, 
+        lng: Number {"typeId": "double"}
+      |}, 
+      mapUrl: String
+    |}>
+  |}>
+|} {"MetadataFormat": "json",
+"example": "{\"info\":{\"statuscode\":0,\"copyright\":{\"text\":\"\u00A9 2018 MapQuest, Inc.\",\"imageUrl\":\"http:\/\/api.mqcdn.com\/res\/mqlogo.gif\",\"imageAltText\":\"\u00A9 2018 MapQuest, Inc.\"},\"messages\":[]},\"options\":{\"maxResults\":-1,\"thumbMaps\":true,\"ignoreLatLngInput\":false},\"results\":[{\"providedLocation\":{\"location\":\"Washington,DC\"},\"locations\":[{\"street\":\"\",\"adminArea6\":\"\",\"adminArea6Type\":\"Neighborhood\",\"adminArea5\":\"Washington\",\"adminArea5Type\":\"City\",\"adminArea4\":\"District of Columbia\",\"adminArea4Type\":\"County\",\"adminArea3\":\"DC\",\"adminArea3Type\":\"State\",\"adminArea1\":\"US\",\"adminArea1Type\":\"Country\",\"postalCode\":\"\",\"geocodeQualityCode\":\"A5XAX\",\"geocodeQuality\":\"CITY\",\"dragPoint\":false,\"sideOfStreet\":\"N\",\"linkId\":\"282772166\",\"unknownInput\":\"\",\"type\":\"s\",\"latLng\":{\"lat\":38.892062,\"lng\":-77.019912},\"displayLatLng\":{\"lat\":38.892062,\"lng\":-77.019912},\"mapUrl\":\"http:\/\/www.mapquestapi.com\/staticmap\/v4\/getmap?key=KEY&type=map&size=225,160&pois=purple-1,38.892062,-77.019912,0,0,|&center=38.892062,-77.019912&zoom=12&rand=306744981\"}]}]}"}
+
+]]></types:shape>
+    </types:type>
+  </types:catalog>
+  <types:enrichment select="#84077ce3-bab6-4007-bbee-afe14e3adc9b">
+    <types:processor-declaration>
+      <types:input-event>
+        <types:message>
+          <types:payload type="GeoCoding"/>
+        </types:message>
+      </types:input-event>
+    </types:processor-declaration>
+  </types:enrichment>
+</types:mule>
